@@ -116,3 +116,5 @@ if __name__ == "__main__":
     print(len(train_x))
     print(len(test_x))
     print(maxlen)
+    print(vocab)
+    print(train_x[:100])

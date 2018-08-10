@@ -7,6 +7,7 @@ import numpy as np
 from time import time
 import utils as U
 import codecs
+import json
 
 logging.basicConfig(
     # filename='out.log',
@@ -19,7 +20,7 @@ logger = logging.getLogger(__name__)
 parser = argparse.ArgumentParser()
 parser.add_argument("-o", "--out-dir", dest="out_dir_path", type=str, metavar='<str>', required=True,
                     help="The path to the output directory")
-parser.add_argument("-e", "--embdim", dest="emb_dim", type=int, metavar='<int>', default=200,
+parser.add_argument("-e", "--embdim", dest="emb_dim", type=int, metavar='<int>', default=300,
                     help="Embeddings dimension (default=200)")
 parser.add_argument("-b", "--batch-size", dest="batch_size", type=int, metavar='<int>', default=50,
                     help="Batch size (default=50)")
@@ -58,12 +59,14 @@ if args.seed > 0:
 # #
 
 from keras.preprocessing import sequence
-import reader as dataset
 
-vocab, train_x, test_x, overall_maxlen = dataset.get_data(args.domain, vocab_size=args.vocab_size, maxlen=args.maxlen)
+with open("../../data/finnish/prepared/word_idx_finnish.json") as fh:
+    vocab = json.load(fh)
+    vocab['<pad>'] = 0
 
-train_x = sequence.pad_sequences(train_x, maxlen=overall_maxlen)
-test_x = sequence.pad_sequences(test_x, maxlen=overall_maxlen)
+dataset = np.load("../../data/finnish/prepared/dataset_finnish.npz")
+train_x = dataset["train_X"]
+overall_maxlen = train_x.shape[1]
 
 print('Number of training examples: ', len(train_x))
 print('Length of vocab: ', len(vocab))
@@ -130,6 +133,8 @@ vocab_inv = {}
 for w, ind in vocab.items():
     vocab_inv[ind] = w
 
+# print(vocab_inv)
+
 sen_gen = sentence_batch_generator(train_x, args.batch_size)
 neg_gen = negative_batch_generator(train_x, args.batch_size, args.neg_size)
 batches_per_epoch = len(train_x) // args.batch_size
@@ -177,7 +182,7 @@ for ii in range(args.epochs):
             ordered_words = np.argsort(sims)[::-1]
             desc_list = [vocab_inv[w] + ":" + str(sims[w]) for w in ordered_words[:100]]
             print('Aspect %d:' % ind)
-            print(str(desc_list).encode("utf-8"))
+            print(str(desc_list))
             aspect_file.write('Aspect %d:\n' % ind)
             aspect_file.write(' '.join(desc_list) + '\n\n')
 

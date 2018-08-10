@@ -3,7 +3,6 @@
 
 import logging
 
-import gensim
 import numpy as np
 from sklearn.cluster import KMeans
 
@@ -17,47 +16,22 @@ class W2VEmbReader:
     def __init__(self, emb_path, emb_dim=None):
 
         logger.info('Loading embeddings from: ' + emb_path)
-        self.embeddings = {}
-        emb_matrix = []
-
-        # loading pretrained vectors
-        model = gensim.models.Word2Vec.load(emb_path)
-        self.emb_dim = emb_dim
-
-        for word in model.wv.vocab:
-            self.embeddings[word] = list(model.wv[word])
-            emb_matrix.append(list(model.wv[word]))
+        self.emb_matrix = np.load(emb_path)
+        # self.emb_matrix = np.delete(self.emb_matrix, (-1), axis=0)
+        self.emb_dim = self.emb_matrix.shape[1]
 
         if emb_dim is not None:
-            assert self.emb_dim == len(self.embeddings['nice'])
+            assert self.emb_dim == emb_dim
 
-        self.vector_size = len(self.embeddings)
-        self.emb_matrix = np.asarray(emb_matrix)
+        self.vector_size = self.emb_matrix.shape[0]
 
         logger.info('  #vectors: %i, #dimensions: %i' % (self.vector_size, self.emb_dim))
 
-    def get_emb_given_word(self, word):
+    def get_emb_matrix(self):
 
-        try:
-            return self.embeddings[word]
-        except KeyError:
-            return None
-
-    def get_emb_matrix_given_vocab(self, vocab, emb_matrix):
-
-        counter = 0.
-        for word, index in vocab.items():
-            try:
-                emb_matrix[index] = self.embeddings[word]
-                counter += 1
-            except KeyError:
-                pass
-
-        logger.info(
-            '%i/%i word vectors initialized (hit rate: %.2f%%)' % (counter, len(vocab), 100 * counter / len(vocab)))
         # L2 normalization
-        norm_emb_matrix = emb_matrix / np.linalg.norm(emb_matrix, axis=-1, keepdims=True)
-
+        norm_emb_matrix = self.emb_matrix / np.linalg.norm(self.emb_matrix, axis=-1, keepdims=True)
+        norm_emb_matrix[np.isnan(norm_emb_matrix)] = 1e-8
         return norm_emb_matrix
 
     def get_aspect_matrix(self, n_clusters):

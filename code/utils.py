@@ -125,7 +125,7 @@ class BColors:
 
     @staticmethod
     def cleared(s):
-        return re.sub("\033\[[0-9][0-9]?m", "", s)
+        return re.sub(r"\033\[[0-9][0-9]?m", "", s)
 
 
 def red(message):

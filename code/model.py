@@ -59,7 +59,7 @@ def create_model(args, maxlen, vocab):
         logger.info('Initializing word embedding matrix')
         K.set_value(
             model.get_layer('word_emb').embeddings,
-            emb_reader.get_emb_matrix_given_vocab(vocab, K.get_value(model.get_layer('word_emb').embeddings)))
+            emb_reader.get_emb_matrix())
         logger.info('Initializing aspect embedding matrix as centroid of kmean clusters')
         K.set_value(
             model.get_layer('aspect_emb').W,

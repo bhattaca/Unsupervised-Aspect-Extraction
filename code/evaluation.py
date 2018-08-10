@@ -3,6 +3,7 @@
 
 import argparse
 import codecs
+import json
 
 import numpy as np
 from sklearn.metrics import classification_report
@@ -14,7 +15,7 @@ import utils as U
 parser = argparse.ArgumentParser()
 parser.add_argument("-o", "--out-dir", dest="out_dir_path", type=str, metavar='<str>', required=True,
                     help="The path to the output directory")
-parser.add_argument("-e", "--embdim", dest="emb_dim", type=int, metavar='<int>', default=200,
+parser.add_argument("-e", "--embdim", dest="emb_dim", type=int, metavar='<int>', default=300,
                     help="Embeddings dimension (default=200)")
 parser.add_argument("-b", "--batch-size", dest="batch_size", type=int, metavar='<int>', default=50,
                     help="Batch size (default=50)")
@@ -45,11 +46,21 @@ U.print_args(args)
 assert args.algorithm in {'rmsprop', 'sgd', 'adagrad', 'adadelta', 'adam', 'adamax'}
 
 from keras.preprocessing import sequence
-import reader as dataset
 
 ###### Get test data #############
-vocab, train_x, test_x, overall_maxlen = dataset.get_data(args.domain, vocab_size=args.vocab_size, maxlen=args.maxlen)
-test_x = sequence.pad_sequences(test_x, maxlen=overall_maxlen)
+
+with open("../../data/finnish/prepared/word_idx_finnish.json") as fh:
+    vocab = json.load(fh)
+    vocab['<pad>'] = 0
+
+dataset = np.load("../../data/finnish/prepared/dataset_finnish.npz")
+test_x = dataset["test_X"]
+test_x_pos = dataset["test_X_POS"]
+overall_maxlen = test_x.shape[1]
+
+dataset_annotated = np.load("../../data/finnish/prepared/dataset_finnish_annotated.npz")
+test_y = dataset["train_y"]
+
 
 ############# Build model architecture, same as the model used for training #########
 from model import create_model
@@ -70,46 +81,6 @@ model.load_weights(out_dir + '/model_param')
 model.compile(optimizer=optimizer, loss=max_margin_loss, metrics=[max_margin_loss])
 
 
-################ Evaluation ####################################
-
-def evaluation(true, predict, domain):
-    true_label = []
-    predict_label = []
-
-    if domain == 'restaurant':
-
-        for line in predict:
-            predict_label.append(line.strip())
-
-        for line in true:
-            true_label.append(line.strip())
-
-        print(classification_report(true_label, predict_label,
-                                    ['Food', 'Staff', 'Ambience', 'Anecdotes', 'Price', 'Miscellaneous'], digits=3))
-
-    else:
-        for line in predict:
-            label = line.strip()
-            if label == 'smell' or label == 'taste':
-                label = 'taste+smell'
-            predict_label.append(label)
-
-        for line in true:
-            label = line.strip()
-            if label == 'smell' or label == 'taste':
-                label = 'taste+smell'
-            true_label.append(label)
-
-        print(classification_report(true_label, predict_label,
-                                    ['feel', 'taste+smell', 'look', 'overall', 'None'], digits=3))
-
-
-def prediction(test_labels, aspect_probs, cluster_map, domain):
-    label_ids = np.argsort(aspect_probs, axis=1)[:, -1]
-    predict_labels = [cluster_map[label_id] for label_id in label_ids]
-    evaluation(open(test_labels), predict_labels, domain)
-
-
 # Create a dictionary that map word index to word
 vocab_inv = {}
 for w, ind in vocab.items():
@@ -123,20 +94,25 @@ att_weights, aspect_probs = test_fn([test_x, 0])
 att_out = codecs.open(out_dir + '/att_weights', 'w', 'utf-8')
 print('Saving attention weights on test sentences...')
 
-for c in range(len(test_x)):
+for idx in range(len(test_y)):
 
     att_out.write('----------------------------------------\n')
-    att_out.write(str(c) + '\n')
+    att_out.write(str(idx) + '\n')
 
-    word_inds = [i for i in test_x[c] if i != 0]
+    word_inds = [i for i in test_x[idx] if i != 0]
     line_len = len(word_inds)
-    weights = att_weights[c]
+    weights = att_weights[idx]
     weights = weights[(overall_maxlen - line_len):]
 
     words = [vocab_inv[i] for i in word_inds]
     att_out.write(' '.join(words) + '\n')
     for j in range(len(words)):
         att_out.write(words[j] + ' ' + str(round(weights[j], 3)) + '\n')
+
+    truths = [i for i in test_y[idx] if i != -1]
+    assert len(words) == len(truths)
+    assert len(words) == len(weights)
+
 
 
 # #####################################################

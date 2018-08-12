@@ -42,9 +42,13 @@ parser.add_argument("--domain", dest="domain", type=str, metavar='<str>', defaul
                     help="domain of the corpus {restaurant, beer}")
 parser.add_argument("--ortho-reg", dest="ortho_reg", type=float, metavar='<float>', default=0.1,
                     help="The weight of orthogonol regularizaiton (default=0.1)")
+parser.add_argument("--model-name", dest="model_name", type=str, metavar='<str>', default="",
+                    help="A name attached to the stored model and aspect log (default="")")
+parser.add_argument("--language", dest="language", type=str, metavar='<str>', default="english",
+                    help="Language, used to determine the folder data is loaded from and stored to")
 
 args = parser.parse_args()
-out_dir = args.out_dir_path + '/' + args.domain
+out_dir = args.out_dir_path + '/' + args.language
 U.mkdir_p(out_dir)
 U.print_args(args)
 
@@ -60,12 +64,25 @@ if args.seed > 0:
 
 from keras.preprocessing import sequence
 
-with open("../../data/finnish/prepared/word_idx_finnish.json") as fh:
+with open(f"../../data/{args.language}/prepared/word_idx_{args.language}.json") as fh:
     vocab = json.load(fh)
-    vocab['<pad>'] = 0
 
-dataset = np.load("../../data/finnish/prepared/dataset_finnish.npz")
+dataset = np.load(f"../../data/{args.language}/prepared/dataset_{args.language}.npz")
 train_x = dataset["train_X"]
+trunced_train = np.zeros(train_x.shape)
+to_delete = []
+for idx, row in enumerate(train_x):
+    trunced_row = row[row != 1]
+    if not trunced_row.any():
+        to_delete.append(idx)
+    else:
+        trunced_train[idx, 0:len(trunced_row)] = trunced_row
+
+print(to_delete)
+print(trunced_train.shape)
+train_x = np.delete(trunced_train, to_delete, axis=0)
+print(train_x.shape)
+
 overall_maxlen = train_x.shape[1]
 
 print('Number of training examples: ', len(train_x))
@@ -147,7 +164,7 @@ for ii in range(args.epochs):
     t0 = time()
     loss, max_margin_loss = 0., 0.
 
-    for b in tqdm(range(batches_per_epoch)):
+    for b in tqdm(range(batches_per_epoch), disable=True):
         sen_input = next(sen_gen)
         neg_input = next(neg_gen)
 
@@ -173,8 +190,8 @@ for ii in range(args.epochs):
         aspect_emb = K.get_value(model.get_layer('aspect_emb').W)
         word_emb = word_emb / np.linalg.norm(word_emb, axis=-1, keepdims=True)
         aspect_emb = aspect_emb / np.linalg.norm(aspect_emb, axis=-1, keepdims=True)
-        aspect_file = codecs.open(out_dir + '/aspect.log', 'w', 'utf-8')
-        model.save_weights(out_dir + '/model_param')
+        aspect_file = codecs.open(out_dir + '/aspect.log' + args.model_name, 'w', 'utf-8')
+        model.save_weights(out_dir + '/model_param' + args.model_name)
 
         for ind in range(len(aspect_emb)):
             desc = aspect_emb[ind]

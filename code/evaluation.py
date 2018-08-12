@@ -7,6 +7,7 @@ import json
 
 import numpy as np
 from sklearn.metrics import classification_report
+import seqeval.metrics
 
 import utils as U
 
@@ -37,6 +38,10 @@ parser.add_argument("--domain", dest="domain", type=str, metavar='<str>', defaul
                     help="domain of the corpus {restaurant, beer}")
 parser.add_argument("--ortho-reg", dest="ortho_reg", type=float, metavar='<float>', default=0.1,
                     help="The weight of orthogonol regularizaiton (default=0.1)")
+parser.add_argument("--model-name", dest="model_name", type=str, metavar='<str>', default="",
+                    help="A name attached to the stored model and aspect log (default="")")
+parser.add_argument("--min-aspect-weight", dest="min_aspect_weight", type=float, metavar='<float>', default=0.1,
+                    help="The minimum weight of a word to be seen as an aspect")
 
 args = parser.parse_args()
 out_dir = args.out_dir_path + '/' + args.domain
@@ -49,16 +54,19 @@ from keras.preprocessing import sequence
 
 ###### Get test data #############
 
-with open("../../data/finnish/prepared/word_idx_finnish.json") as fh:
+with open("../../data/finnish/prepared_he/word_idx_finnish.json") as fh:
     vocab = json.load(fh)
     vocab['<pad>'] = 0
 
-dataset = np.load("../../data/finnish/prepared/dataset_finnish.npz")
+with open("../../data/finnish/prepared_he/pos_idx_finnish.json") as fh:
+    pos_vocab = json.load(fh)
+
+dataset = np.load("../../data/finnish/prepared_he/dataset_finnish.npz")
 test_x = dataset["test_X"]
 test_x_pos = dataset["test_X_POS"]
 overall_maxlen = test_x.shape[1]
 
-dataset_annotated = np.load("../../data/finnish/prepared/dataset_finnish_annotated.npz")
+dataset_annotated = np.load("../../data/finnish/prepared_annotated/dataset_finnish.npz")
 test_y = dataset["train_y"]
 
 
@@ -77,7 +85,7 @@ def max_margin_loss(y_true, y_pred):
 model = create_model(args, overall_maxlen, vocab)
 
 ## Load the save model parameters
-model.load_weights(out_dir + '/model_param')
+model.load_weights(out_dir + '/model_param' + args.model_name)
 model.compile(optimizer=optimizer, loss=max_margin_loss, metrics=[max_margin_loss])
 
 
@@ -86,13 +94,55 @@ vocab_inv = {}
 for w, ind in vocab.items():
     vocab_inv[ind] = w
 
+# Create a dictionary that map word index to word
+pos_inv = {}
+for w, ind in pos_vocab.items():
+    pos_inv[ind] = w
+
+trunced_x = np.zeros(test_x.shape)
+trunc_positions = []
+for idx, row in enumerate(test_x):
+    to_delete = np.where(row == 1)
+    trunc_positions.append(to_delete)
+    trunced_row = np.delete(row, to_delete)
+    trunced_x[idx, 0:len(trunced_row)] = trunced_row
+
+test_x = trunced_x
+
 test_fn = K.function([model.get_layer('sentence_input').input, K.learning_phase()],
                      [model.get_layer('att_weights').output, model.get_layer('p_t').output])
 att_weights, aspect_probs = test_fn([test_x, 0])
 
 # Save attention weights on test sentences into a file
-att_out = codecs.open(out_dir + '/att_weights', 'w', 'utf-8')
+att_out = codecs.open(out_dir + '/att_weights' + args.model_name, 'w', 'utf-8')
 print('Saving attention weights on test sentences...')
+
+
+def fix_BIO(tags):
+    last_tag = "O"
+    fixed_tags = []
+    for tag in tags:
+        if tag == "I" and last_tag == "O":
+            tag = "B"
+        fixed_tags.append(tag)
+        last_tag = tag
+    return fixed_tags
+
+
+def get_tags(weights, pos_tags):
+    tags = []
+    for idx in range(len(weights)):
+        if weights[idx] > args.min_aspect_weight and pos_tags[idx] in {"NOUN", "PROPN"}:
+            tags.append("B")
+        else:
+            tags.append("O")
+    return fix_BIO(tags)
+
+
+idx_to_tag = {0: "O", 1: "B", 2: "I"}.get
+
+all_predictions = []
+all_truths = []
 
 for idx in range(len(test_y)):
 
@@ -100,18 +150,34 @@ for idx in range(len(test_y)):
     att_out.write(str(idx) + '\n')
 
     word_inds = [i for i in test_x[idx] if i != 0]
-    line_len = len(word_inds)
     weights = att_weights[idx]
-    weights = weights[(overall_maxlen - line_len):]
+
+    for pos in trunc_positions[idx][0]:
+        word_inds = np.insert(word_inds, pos, 1)
+        weights = np.insert(weights, pos, 0.0)
+
+    line_len = len(word_inds)
+    weights = weights[:line_len]
 
     words = [vocab_inv[i] for i in word_inds]
+    pos_tags = [pos_inv[i] for i in test_x_pos[idx] if i != 0]
+    prediction = get_tags(weights, pos_tags)
+    truths = [idx_to_tag(i) for i in test_y[idx] if i != -1]
+
     att_out.write(' '.join(words) + '\n')
     for j in range(len(words)):
-        att_out.write(words[j] + ' ' + str(round(weights[j], 3)) + '\n')
+        att_out.write(' '.join([words[j], str(round(weights[j], 3)), pos_tags[j], prediction[j], truths[j]]) + '\n')
 
-    truths = [i for i in test_y[idx] if i != -1]
     assert len(words) == len(truths)
     assert len(words) == len(weights)
+
+    all_predictions.append(prediction)
+    all_truths.append(truths)
+
+print(seqeval.metrics.precision_score(all_truths, all_predictions))
+print(seqeval.metrics.recall_score(all_truths, all_predictions))
+print(seqeval.metrics.f1_score(all_truths, all_predictions))
+
 
 
 

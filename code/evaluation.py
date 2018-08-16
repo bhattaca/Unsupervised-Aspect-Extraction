@@ -133,7 +133,7 @@ def get_tags(weights, pos_tags):
     tags = []
     for idx in range(len(weights)):
         if weights[idx] > args.min_aspect_weight and pos_tags[idx] in {"NOUN", "PROPN"}:
-            tags.append("B")
+            tags.append("I")
         else:
             tags.append("O")
     return fix_BIO(tags)

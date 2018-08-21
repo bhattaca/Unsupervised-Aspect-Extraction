@@ -18,8 +18,6 @@ logger = logging.getLogger(__name__)
 # Parse arguments
 
 parser = argparse.ArgumentParser()
-parser.add_argument("-o", "--out-dir", dest="out_dir_path", type=str, metavar='<str>', required=True,
-                    help="The path to the output directory")
 parser.add_argument("-e", "--embdim", dest="emb_dim", type=int, metavar='<int>', default=300,
                     help="Embeddings dimension (default=200)")
 parser.add_argument("-b", "--batch-size", dest="batch_size", type=int, metavar='<int>', default=50,
@@ -48,7 +46,7 @@ parser.add_argument("--language", dest="language", type=str, metavar='<str>', de
                     help="Language, used to determine the folder data is loaded from and stored to")
 
 args = parser.parse_args()
-out_dir = args.out_dir_path + '/' + args.language
+out_dir = f"../../data/{args.language}/models/he2017/{args.model_name}"
 U.mkdir_p(out_dir)
 U.print_args(args)
 
@@ -164,7 +162,7 @@ for ii in range(args.epochs):
     t0 = time()
     loss, max_margin_loss = 0., 0.
 
-    for b in tqdm(range(batches_per_epoch), disable=True):
+    for b in tqdm(range(batches_per_epoch), disable=False):
         sen_input = next(sen_gen)
         neg_input = next(neg_gen)
 

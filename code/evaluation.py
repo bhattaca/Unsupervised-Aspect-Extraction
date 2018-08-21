@@ -6,16 +6,15 @@ import codecs
 import json
 
 import numpy as np
-from sklearn.metrics import classification_report
-import seqeval.metrics
 
-import utils as U
+import he2017.code.utils as U
+from common.util import evaluate
+from common.config import tag_to_idx, idx_to_tag
+
 
 ######### Get hyper-params in order to rebuild the model architecture ###########
 # The hyper parameters should be exactly the same as those used for training
 parser = argparse.ArgumentParser()
-parser.add_argument("-o", "--out-dir", dest="out_dir_path", type=str, metavar='<str>', required=True,
-                    help="The path to the output directory")
 parser.add_argument("-e", "--embdim", dest="emb_dim", type=int, metavar='<int>', default=300,
                     help="Embeddings dimension (default=200)")
 parser.add_argument("-b", "--batch-size", dest="batch_size", type=int, metavar='<int>', default=50,
@@ -40,12 +39,13 @@ parser.add_argument("--ortho-reg", dest="ortho_reg", type=float, metavar='<float
                     help="The weight of orthogonol regularizaiton (default=0.1)")
 parser.add_argument("--model-name", dest="model_name", type=str, metavar='<str>', default="",
                     help="A name attached to the stored model and aspect log (default="")")
-parser.add_argument("--min-aspect-weight", dest="min_aspect_weight", type=float, metavar='<float>', default=0.1,
+parser.add_argument("--language", dest="language", type=str, metavar='<str>', default="english",
+                    help="Language, used to determine the folder data is loaded from and stored to")
+parser.add_argument("--min-aspect-weight", dest="min_aspect_weight", type=float, metavar='<float>', default=0.2,
                     help="The minimum weight of a word to be seen as an aspect")
 
 args = parser.parse_args()
-out_dir = args.out_dir_path + '/' + args.domain
-# out_dir = '../pre_trained_model/' + args.domain
+out_dir = f"data/{args.language}/models/he2017/{args.model_name}"
 U.print_args(args)
 
 assert args.algorithm in {'rmsprop', 'sgd', 'adagrad', 'adadelta', 'adam', 'adamax'}
@@ -54,21 +54,20 @@ from keras.preprocessing import sequence
 
 ###### Get test data #############
 
-with open("../../data/finnish/prepared_he/word_idx_finnish.json") as fh:
+with open(f"data/{args.language}/prepared/word_idx_{args.language}.json") as fh:
     vocab = json.load(fh)
     vocab['<pad>'] = 0
 
-with open("../../data/finnish/prepared_he/pos_idx_finnish.json") as fh:
+with open(f"data/{args.language}/prepared/pos_idx_{args.language}.json") as fh:
     pos_vocab = json.load(fh)
 
-dataset = np.load("../../data/finnish/prepared_he/dataset_finnish.npz")
-test_x = dataset["test_X"]
-test_x_pos = dataset["test_X_POS"]
+dataset_annotated = np.load(f"data/{args.language}/prepared_annotated/dataset_{args.language}_annotated.npz")
+test_y = dataset_annotated["train_y"]
+
+dataset = np.load(f"data/{args.language}/prepared/dataset_{args.language}.npz")
+test_x = dataset["train_X"][:test_y.shape[0]]
+test_x_pos = dataset["train_X_POS"][:test_y.shape[0]]
 overall_maxlen = test_x.shape[1]
-
-dataset_annotated = np.load("../../data/finnish/prepared_annotated/dataset_finnish.npz")
-test_y = dataset["train_y"]
-
 
 ############# Build model architecture, same as the model used for training #########
 from model import create_model
@@ -84,7 +83,7 @@ def max_margin_loss(y_true, y_pred):
 
 model = create_model(args, overall_maxlen, vocab)
 
-## Load the save model parameters
+## Load the saved model parameters
 model.load_weights(out_dir + '/model_param' + args.model_name)
 model.compile(optimizer=optimizer, loss=max_margin_loss, metrics=[max_margin_loss])
 
@@ -124,22 +123,25 @@ def fix_BIO(tags):
     for tag in tags:
         if tag == "I" and last_tag == "O":
             tag = "B"
-        fixed_tags.append(tag)
+        fixed_tags.append(tag_to_idx(tag))
         last_tag = tag
     return fixed_tags
 
 
 def get_tags(weights, pos_tags):
+    noun_tags = {
+        "finnish": {"NOUN", "PROPN"},
+        "english": {"NN", "NNP", "NNS", "NNPS"}
+    }.get(args.language)
+
     tags = []
     for idx in range(len(weights)):
-        if weights[idx] > args.min_aspect_weight and pos_tags[idx] in {"NOUN", "PROPN"}:
+        if weights[idx] > args.min_aspect_weight and pos_tags[idx] in noun_tags:
             tags.append("I")
         else:
             tags.append("O")
-    return fix_BIO(tags)
+    return np.array(fix_BIO(tags))
 
-
-idx_to_tag = {0: "O", 1: "B", 2: "I"}.get
 
 all_predictions = []
 all_truths = []
@@ -162,24 +164,19 @@ for idx in range(len(test_y)):
     words = [vocab_inv[i] for i in word_inds]
     pos_tags = [pos_inv[i] for i in test_x_pos[idx] if i != 0]
     prediction = get_tags(weights, pos_tags)
-    truths = [idx_to_tag(i) for i in test_y[idx] if i != -1]
+    truths = test_y[idx]
 
     att_out.write(' '.join(words) + '\n')
     for j in range(len(words)):
-        att_out.write(' '.join([words[j], str(round(weights[j], 3)), pos_tags[j], prediction[j], truths[j]]) + '\n')
-
-    assert len(words) == len(truths)
-    assert len(words) == len(weights)
+        att_out.write(' '.join([
+            words[j], str(round(weights[j], 3)), pos_tags[j], idx_to_tag(prediction[j]),
+            idx_to_tag(truths[j])
+        ]) + '\n')
 
     all_predictions.append(prediction)
     all_truths.append(truths)
 
-print(seqeval.metrics.precision_score(all_truths, all_predictions))
-print(seqeval.metrics.recall_score(all_truths, all_predictions))
-print(seqeval.metrics.f1_score(all_truths, all_predictions))
-
-
-
+evaluate(all_truths, all_predictions)
 
 # #####################################################
 # # Uncomment the below part for F scores

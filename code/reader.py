@@ -14,8 +14,8 @@ def is_number(token):
 
 def create_vocab(domain, maxlen=0, vocab_size=0):
     assert domain in {'restaurant', 'beer', 'eaters'}
-    source = '../preprocessed_data/' + domain + '/train.txt'
-
+    source = '/mnt/cephfs/hadoop-compute/phoenix/arindam/projectKraken/data/unsupervised_aspect_data/preprocessed_data/' + domain + '/train.txt'
+    print ("Creating dataset from %s" %source)
     total_words, unique_words = 0, 0
     word_freqs = {}
 

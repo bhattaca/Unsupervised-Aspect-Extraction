@@ -17,8 +17,8 @@ def parse_sentence(line):
 
 
 def preprocess_train(domain):
-    f = codecs.open('../datasets/' + domain + '/train.txt', 'r', 'utf-8')
-    out = codecs.open('../preprocessed_data/' + domain + '/train.txt', 'w', 'utf-8')
+    f = codecs.open('/mnt/cephfs/hadoop-compute/phoenix/arindam/projectKraken/data/unsupervised_aspect_data/datasets/' + domain + '/train.txt', 'r', 'utf-8')
+    out = codecs.open('/mnt/cephfs/hadoop-compute/phoenix/arindam/projectKraken/data/unsupervised_aspect_data/preprocessed_data/' + domain + '/train.txt', 'w', 'utf-8')
 
     for line in f:
         tokens = parse_sentence(line)
@@ -56,4 +56,4 @@ def preprocess(domain):
 
 if __name__ == "__main__":
     print('Preprocessing raw review sentences ...')
-    preprocess('Eaters')
+    preprocess('eaters')

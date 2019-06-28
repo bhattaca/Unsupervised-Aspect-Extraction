@@ -55,5 +55,4 @@ def preprocess(domain):
 
 if __name__ == "__main__":
     print('Preprocessing raw review sentences ...')
-    preprocess('restaurant')
-    preprocess('beer')
+    preprocess('Eaters')

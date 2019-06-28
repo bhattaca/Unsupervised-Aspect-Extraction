@@ -105,10 +105,11 @@ def get_data(domain, vocab_size=0, maxlen=0):
     print(' Reading dataset ...')
     print('  train set')
     train_x, train_maxlen = read_dataset(domain, 'train', vocab, maxlen)
-    print('  test set')
-    test_x, test_maxlen = read_dataset(domain, 'test', vocab, maxlen)
-    maxlen = max(train_maxlen, test_maxlen)
-    return vocab, train_x, test_x, maxlen
+    print('  Not reading test set')
+    return vocab, train_x, train_x, train_maxlen
+    #test_x, test_maxlen = read_dataset(domain, 'test', vocab, maxlen)
+    #maxlen = max(train_maxlen, test_maxlen)
+    #return vocab, train_x, test_x, maxlen
 
 
 if __name__ == "__main__":

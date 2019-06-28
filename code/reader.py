@@ -49,7 +49,7 @@ def create_vocab(domain, maxlen=0, vocab_size=0):
         print('  keep the top %i words' % vocab_size)
 
     # Write (vocab, frequence) to a txt file
-    vocab_file = codecs.open('../preprocessed_data/%s/vocab' % domain, mode='w', encoding='utf8')
+    vocab_file = codecs.open('/mnt/cephfs/hadoop-compute/phoenix/arindam/projectKraken/data/unsupervised_aspect_data//preprocessed_data/%s/vocab' % domain, mode='w', encoding='utf8')
     sorted_vocab = sorted(vocab.items(), key=operator.itemgetter(1))
     for word, index in sorted_vocab:
         if index < 3:
@@ -65,7 +65,7 @@ def read_dataset(domain, phase, vocab, maxlen):
     # assert domain in {'restaurant', 'beer'}
     assert phase in {'train', 'test'}
 
-    source = '../preprocessed_data/' + domain + '/' + phase + '.txt'
+    source = '/mnt/cephfs/hadoop-compute/phoenix/arindam/projectKraken/data/unsupervised_aspect_data/preprocessed_data/' + domain + '/' + phase + '.txt'
     num_hit, unk_hit, total = 0., 0., 0.
     maxlen_x = 0
     data_x = []

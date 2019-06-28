@@ -10,7 +10,6 @@ import codecs
 def parse_sentence(line):
     lmtzr = WordNetLemmatizer()
     stop = stopwords.words('english')
-    print ( "AB_DEBUG ", stop)
     text_token = CountVectorizer().build_tokenizer()(line.lower())
     text_rmstop = [i for i in text_token if i not in stop]
     text_stem = [lmtzr.lemmatize(w) for w in text_rmstop]

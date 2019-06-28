@@ -49,8 +49,9 @@ def preprocess_test(domain):
 def preprocess(domain):
     print('\t' + domain + ' train set ...')
     preprocess_train(domain)
-    print('\t' + domain + ' test set ...')
-    preprocess_test(domain)
+    #AB_DEBUG
+    #print('\t' + domain + ' test set ...')
+    #preprocess_test(domain)
 
 
 if __name__ == "__main__":

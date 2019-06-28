@@ -24,5 +24,4 @@ def main(domain):
 
 if __name__ == "__main__":
     print('Pre-training word embeddings ...')
-    main('restaurant')
-    main('beer')
+    main('Eaters')

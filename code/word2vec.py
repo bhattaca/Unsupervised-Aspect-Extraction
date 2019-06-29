@@ -18,6 +18,8 @@ def main(domain):
     source = '/mnt/cephfs/hadoop-compute/phoenix/arindam/projectKraken/data/unsupervised_aspect_data/preprocessed_data/%s/train.txt' % domain
     model_file = '/mnt/cephfs/hadoop-compute/phoenix/arindam/projectKraken/data/unsupervised_aspect_data/preprocessed_data/%s/w2v_embedding' % domain
     sentences = Sentences(source)
+    #AB_DEBUG
+    print ( 'sentences ', sentences.shape)
     model = gensim.models.Word2Vec(sentences, size=200, window=5, min_count=10, workers=4, sg=1, iter=2)
     model.save(model_file)
 

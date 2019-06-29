@@ -178,8 +178,7 @@ for ii in range(args.epochs):
             print(ordered_words[:10])
             print(vocab_inv[56])
             print(sims[56])
-            #desc_list = [vocab_inv[w] + ":" + str(sims[w]) for w in ordered_words[:100]]
-            desc_list = [unicode(vocab_inv[w]).encode('utf8')+ ":" + str(sims[w]) for w in ordered_words[:100]]
+            desc_list = [vocab_inv[w] + ":" + str(sims[w]) for w in ordered_words[:100]]
             print('Aspect %d:' % ind)
             print(desc_list)
             aspect_file.write('Aspect %d:\n' % ind)

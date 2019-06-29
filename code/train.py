@@ -176,7 +176,7 @@ for ii in range(args.epochs):
             sims = word_emb.dot(desc.T)
             ordered_words = np.argsort(sims)[::-1]
             #desc_list = [vocab_inv[w] + ":" + str(sims[w]) for w in ordered_words[:100]]
-            desc_list = [(vocab_inv[w]).encode('utf-8') + ":" + (sims[w]).encode('utf-8').strip() for w in ordered_words[:100]]
+            desc_list = [vocab_inv[w].encode("utf-8") + ":" + (sims[w].encode("utf-8")) for w in ordered_words[:100]]
             print('Aspect %d:' % ind)
             print(desc_list)
             aspect_file.write('Aspect %d:\n' % ind)

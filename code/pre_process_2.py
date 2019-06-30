@@ -24,13 +24,18 @@ def cleaning(doc):
     if len(txt) > 2:
         return ' '.join(txt)
 
-f=io.open("/mnt/cephfs/hadoop-compute/phoenix/arindam/projectKraken/data/unsupervised_aspect_data//datasets/eaters/train.txt", mode="r", encoding="utf-8")
-data_=f.read(1000)
-f.close()
+# f=io.open("/mnt/cephfs/hadoop-compute/phoenix/arindam/projectKraken/data/unsupervised_aspect_data//datasets/eaters/train.txt", mode="r", encoding="utf-8")
+# data_=f.read(1000)
+# f.close()
+
+
+df = pd.read_csv("/mnt/cephfs/hadoop-compute/phoenix/arindam/projectKraken/data/unsupervised_aspect_data//datasets/eaters/train.txt", delimiter="\n")
+
+
 print("finished reading")
-print(data_)
+
 print ("***************")
-brief_cleaning = (re.sub("[^A-Za-z']+", ' ', str(row)).lower() for row in data_)
+brief_cleaning = (re.sub("[^A-Za-z']+", ' ', str(row)).lower() for row in df)
 print(brief_cleaning)
 print ("*************")
 t = time()

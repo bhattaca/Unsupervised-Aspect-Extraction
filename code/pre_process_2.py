@@ -7,6 +7,7 @@ import re  # For preprocessing
 import pandas as pd  # For data handling
 from time import time  # To time our operations
 from collections import defaultdict  # For word frequency
+import io
 
 import spacy  # For preprocessing
 
@@ -22,8 +23,7 @@ def cleaning(doc):
     if len(txt) > 2:
         return ' '.join(txt)
 
-
-f = open("/mnt/cephfs/hadoop-compute/phoenix/arindam/projectKraken/data/unsupervised_aspect_data//datasets/eaters/train.txt", "r")
+f=io.open("/mnt/cephfs/hadoop-compute/phoenix/arindam/projectKraken/data/unsupervised_aspect_data//datasets/eaters/train.txt", mode="r", encoding="utf-8")
 data_=f.read()
 f.close()
 
@@ -34,6 +34,8 @@ txt = [cleaning(doc) for doc in nlp.pipe(brief_cleaning, batch_size=5000, n_thre
 
 print('Time to clean up everything: {} mins'.format(round((time() - t) / 60, 2)))
 
-f = open("/mnt/cephfs/hadoop-compute/phoenix/arindam/projectKraken/data/unsupervised_aspect_data//datasets/eaters/train_clean.txt", "a")
-f.write(txt)
-f.close()
+
+
+# process Unicode text
+with io.open("/mnt/cephfs/hadoop-compute/phoenix/arindam/projectKraken/data/unsupervised_aspect_data//datasets/eaters/train_clean.txt", 'w', encoding='utf8') as f:
+    f.write(txt)

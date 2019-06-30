@@ -11,7 +11,7 @@ import io
 
 import spacy  # For preprocessing
 
-nlp = spacy.load('en_core_web_lg') # disabling Named Entity Recognition for speed
+nlp = spacy.load('en_core_web_lg', disable=['ner', 'parser']) # disabling Named Entity Recognition for speed
 
 def cleaning(doc):
     # Lemmatizes and removes stopwords
@@ -26,10 +26,9 @@ def cleaning(doc):
 f=io.open("/mnt/cephfs/hadoop-compute/phoenix/arindam/projectKraken/data/unsupervised_aspect_data//datasets/eaters/train.txt", mode="r", encoding="utf-8")
 data_=f.read()
 f.close()
-
+print ("finished reading")
 brief_cleaning = (re.sub("[^A-Za-z']+", ' ', str(row)).lower() for row in data_)
 t = time()
-
 txt = [cleaning(doc) for doc in nlp.pipe(brief_cleaning, batch_size=5000, n_threads=-1)]
 
 print('Time to clean up everything: {} mins'.format(round((time() - t) / 60, 2)))
@@ -38,4 +37,4 @@ print('Time to clean up everything: {} mins'.format(round((time() - t) / 60, 2))
 
 # process Unicode text
 with io.open("/mnt/cephfs/hadoop-compute/phoenix/arindam/projectKraken/data/unsupervised_aspect_data//datasets/eaters/train_clean.txt", 'w', encoding='utf8') as f:
-    f.write(txt)
+    f.write("\n".join(txt))

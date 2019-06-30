@@ -4,6 +4,7 @@
 
 
 import re  # For preprocessing
+import numpy as np
 import pandas as pd  # For data handling
 from time import time  # To time our operations
 from collections import defaultdict  # For word frequency

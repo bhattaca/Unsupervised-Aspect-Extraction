@@ -37,4 +37,6 @@ print (len(txt))
 
 # process Unicode text
 with io.open("/mnt/cephfs/hadoop-compute/phoenix/arindam/projectKraken/data/unsupervised_aspect_data//datasets/eaters/train_clean.txt", 'w', encoding='utf8') as f:
-    f.write('\n'.join(txt))
+    for item in txt:
+        f.write("%s\n" % item)
+f.close()

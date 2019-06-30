@@ -27,9 +27,11 @@ f=io.open("/mnt/cephfs/hadoop-compute/phoenix/arindam/projectKraken/data/unsuper
 data_=f.read(1000)
 f.close()
 print("finished reading")
-print (data_)
+print(data_)
+print ("***************")
 brief_cleaning = (re.sub("[^A-Za-z']+", ' ', str(row)).lower() for row in data_)
-print (brief_cleaning)
+print(brief_cleaning)
+print ("*************")
 t = time()
 txt = [cleaning(doc) for doc in nlp.pipe(brief_cleaning, batch_size=5000, n_threads=-1)]
 print (txt)

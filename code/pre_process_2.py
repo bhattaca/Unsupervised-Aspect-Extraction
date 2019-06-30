@@ -24,13 +24,13 @@ def cleaning(doc):
         return ' '.join(txt)
 
 f=io.open("/mnt/cephfs/hadoop-compute/phoenix/arindam/projectKraken/data/unsupervised_aspect_data//datasets/eaters/train.txt", mode="r", encoding="utf-8")
-data_=f.read()
+data_=f.read(1000)
 f.close()
 print ("finished reading")
 brief_cleaning = (re.sub("[^A-Za-z']+", ' ', str(row)).lower() for row in data_)
 t = time()
 txt = [cleaning(doc) for doc in nlp.pipe(brief_cleaning, batch_size=5000, n_threads=-1)]
-
+print (txt)
 print('Time to clean up everything: {} mins'.format(round((time() - t) / 60, 2)))
 
 print (len(txt))

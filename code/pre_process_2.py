@@ -29,7 +29,7 @@ def cleaning(doc):
 # f.close()
 
 
-df = pd.read_csv("/mnt/cephfs/hadoop-compute/phoenix/arindam/projectKraken/data/unsupervised_aspect_data//datasets/eaters/train.txt", delimiter="\n")
+df = pd.read_csv("/mnt/cephfs/hadoop-compute/phoenix/arindam/projectKraken/data/unsupervised_aspect_data//datasets/eaters/train.txt", delimiter="\N",header = None)
 
 
 print("finished reading")

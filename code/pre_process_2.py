@@ -20,6 +20,7 @@ def cleaning(doc):
     # Word2Vec uses context words to learn the vector representation of a target word,
     # if a sentence is only one or two words long,
     # the benefit for the training is very small
+    print ("--",txt)
     if len(txt) > 2:
         return ' '.join(txt)
 

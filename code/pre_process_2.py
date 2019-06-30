@@ -28,7 +28,7 @@ def cleaning(doc):
 # data_=f.read(1000)
 # f.close()
 
-lines = (line.rstrip('\n') for line in open("/mnt/cephfs/hadoop-compute/phoenix/arindam/projectKraken/data/unsupervised_aspect_data//datasets/eaters/train.txt"))
+lines = (line.rstrip('\n') for line in open("/mnt/cephfs/hadoop-compute/phoenix/arindam/projectKraken/data/unsupervised_aspect_data//datasets/eaters/train.txt",encoding="utf-8"))
 
 print("finished reading")
 

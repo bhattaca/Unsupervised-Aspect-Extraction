@@ -4,14 +4,13 @@
 
 
 import re  # For preprocessing
-import numpy as np
 import pandas as pd  # For data handling
 from time import time  # To time our operations
 from collections import defaultdict  # For word frequency
 
 import spacy  # For preprocessing
 
-nlp = spacy.load('en') # disabling Named Entity Recognition for speed
+nlp = spacy.load('en_core_web_lg') # disabling Named Entity Recognition for speed
 
 def cleaning(doc):
     # Lemmatizes and removes stopwords

@@ -33,8 +33,8 @@ txt = [cleaning(doc) for doc in nlp.pipe(brief_cleaning, batch_size=5000, n_thre
 
 print('Time to clean up everything: {} mins'.format(round((time() - t) / 60, 2)))
 
-
+print (len(txt))
 
 # process Unicode text
 with io.open("/mnt/cephfs/hadoop-compute/phoenix/arindam/projectKraken/data/unsupervised_aspect_data//datasets/eaters/train_clean.txt", 'w', encoding='utf8') as f:
-    f.write("\n".join(txt))
+    f.write('\n'.join(txt))

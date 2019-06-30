@@ -28,14 +28,12 @@ def cleaning(doc):
 # data_=f.read(1000)
 # f.close()
 
-
-df = pd.read_csv("/mnt/cephfs/hadoop-compute/phoenix/arindam/projectKraken/data/unsupervised_aspect_data//datasets/eaters/train.txt", delimiter="\N",header = None)
-
+lines = (line.rstrip('\n') for line in open("/mnt/cephfs/hadoop-compute/phoenix/arindam/projectKraken/data/unsupervised_aspect_data//datasets/eaters/train.txt"))
 
 print("finished reading")
 
 print ("***************")
-brief_cleaning = (re.sub("[^A-Za-z']+", ' ', str(row)).lower() for row in df)
+brief_cleaning = (re.sub("[^A-Za-z']+", ' ', str(row)).lower() for row in lines)
 print(brief_cleaning)
 print ("*************")
 t = time()

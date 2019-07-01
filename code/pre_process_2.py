@@ -28,12 +28,12 @@ def cleaning(doc):
 # f.close()
 
 lines = (line.rstrip('\n') for line in open("/mnt/cephfs/hadoop-compute/phoenix/arindam/projectKraken/data/unsupervised_aspect_data//datasets/eaters/train.txt",encoding="utf-8"))
-
+print ( "length ", len(lines))
 #make a df. remove empty rows
 df = pd.DataFrame(lines)
 df.dropna(inplace=True)
 
-print("finished reading")
+print("finished reading ", df.shape)
 brief_cleaning = (re.sub("[^A-Za-z']+", ' ', str(row)).lower() for row in df)
 
 t = time()

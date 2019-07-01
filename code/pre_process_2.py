@@ -1,5 +1,5 @@
 ## preprocess
-## Arindam
+## Arindam  Arindam preprocess
 ## https://www.kaggle.com/pierremegret/gensim-word2vec-tutorial/notebook
 
 
@@ -44,7 +44,7 @@ print('Time to clean up everything: {} mins'.format(round((time() - t) / 60, 2))
 print (len(txt))
 
 # process Unicode text
-with io.open("/mnt/cephfs/hadoop-compute/phoenix/arindam/projectKraken/data/unsupervised_aspect_data//datasets/eaters/train_clean.txt", 'w', encoding='utf8') as f:
+with io.open("/mnt/cephfs/hadoop-compute/phoenix/arindam/projectKraken/data/unsupervised_aspect_data//preprocessed_data//eaters/train.txt", 'w', encoding='utf8') as f:
     for item in txt:
         f.write("%s\n" % item)
 f.close()

@@ -16,11 +16,12 @@ nlp = spacy.load('en_core_web_lg', disable=['ner', 'parser']) # disabling Named 
 def cleaning(doc):
     # Lemmatizes and removes stopwords
     # doc needs to be a spacy Doc object
+    if len(doc) == 0:
+      return
     txt = [token.lemma_ for token in doc if not token.is_stop]
     # Word2Vec uses context words to learn the vector representation of a target word,
     # if a sentence is only one or two words long,
     # the benefit for the training is very small
-    print ("--",txt)
     if len(txt) > 2:
         return ' '.join(txt)
 
@@ -38,7 +39,6 @@ print(brief_cleaning)
 print ("*************")
 t = time()
 txt = [cleaning(doc) for doc in nlp.pipe(brief_cleaning, batch_size=5000, n_threads=-1)]
-print (txt)
 print('Time to clean up everything: {} mins'.format(round((time() - t) / 60, 2)))
 
 print (len(txt))

@@ -16,8 +16,6 @@ nlp = spacy.load('en_core_web_lg', disable=['ner', 'parser']) # disabling Named 
 def cleaning(doc):
     # Lemmatizes and removes stopwords
     # doc needs to be a spacy Doc object
-    if len(doc) == 0:
-      return
     txt = [token.lemma_ for token in doc if not token.is_stop]
     # Word2Vec uses context words to learn the vector representation of a target word,
     # if a sentence is only one or two words long,
@@ -31,12 +29,13 @@ def cleaning(doc):
 
 lines = (line.rstrip('\n') for line in open("/mnt/cephfs/hadoop-compute/phoenix/arindam/projectKraken/data/unsupervised_aspect_data//datasets/eaters/train.txt",encoding="utf-8"))
 
-print("finished reading")
+#make a df. remove empty rows
+df = pd.DataFrame(lines)
+df.dropna(inplace=True)
 
-print ("***************")
-brief_cleaning = (re.sub("[^A-Za-z']+", ' ', str(row)).lower() for row in lines)
-print(brief_cleaning)
-print ("*************")
+print("finished reading")
+brief_cleaning = (re.sub("[^A-Za-z']+", ' ', str(row)).lower() for row in df)
+
 t = time()
 txt = [cleaning(doc) for doc in nlp.pipe(brief_cleaning, batch_size=5000, n_threads=-1)]
 print('Time to clean up everything: {} mins'.format(round((time() - t) / 60, 2)))

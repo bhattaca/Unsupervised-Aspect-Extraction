@@ -65,8 +65,8 @@ vocab, train_x, test_x, overall_maxlen = dataset.get_data(args.domain, vocab_siz
 train_x = sequence.pad_sequences(train_x, maxlen=overall_maxlen)
 test_x = sequence.pad_sequences(test_x, maxlen=overall_maxlen)
 
-print('Number of training examples: ', len(train_x))
-print('Length of vocab: ', len(vocab))
+print('****AB_DEBUG**** Number of training examples: ', len(train_x))
+print('****AB_DEBUG**** Length of vocab: ', len(vocab))
 
 
 def sentence_batch_generator(data, batch_size):

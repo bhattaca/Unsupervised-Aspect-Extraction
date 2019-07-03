@@ -31,7 +31,13 @@ def create_model(args, maxlen, vocab):
     neg_input = Input(shape=(args.neg_size, maxlen), dtype='int32', name='neg_input')
 
     # Construct word embedding layer
+    #keras.layers.Embedding(input_dim{This is the size of the vocabulary in the text data.}, output_dim,
+    # embeddings_initializer='uniform', embeddings_regularizer=None,
+    # activity_regularizer=None, embeddings_constraint=None, mask_zero=False, input_length=None)
     word_emb = Embedding(vocab_size, args.emb_dim, mask_zero=True, name='word_emb')
+    print ("vocab_size: ", vocab_size)
+    print("maxlen: ", maxlen)
+    print ("args.emb_dim: ", args.emb_dim)
 
     # Compute sentence representation
     e_w = word_emb(sentence_input)
@@ -56,11 +62,11 @@ def create_model(args, maxlen, vocab):
     # Word embedding and aspect embedding initialization
     if args.emb_path:
         emb_reader = EmbReader(args.emb_path, emb_dim=args.emb_dim)
-        logger.info('Initializing word embedding matrix')
+        logger.info('****AB_DEBUG**** Initializing word embedding matrix')
         K.set_value(
             model.get_layer('word_emb').embeddings,
             emb_reader.get_emb_matrix_given_vocab(vocab, K.get_value(model.get_layer('word_emb').embeddings)))
-        logger.info('Initializing aspect embedding matrix as centroid of kmean clusters')
+        logger.info('****AB_DEBUG**** Initializing aspect embedding matrix as centroid of kmean clusters')
         K.set_value(
             model.get_layer('aspect_emb').W,
             emb_reader.get_aspect_matrix(args.aspect_size))

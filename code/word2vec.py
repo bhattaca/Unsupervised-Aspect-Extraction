@@ -22,7 +22,7 @@ def main(domain):
     model_file = '/mnt/cephfs/hadoop-compute/phoenix/arindam/projectKraken/data/unsupervised_aspect_data/preprocessed_data/%s/w2v_embedding.bin' % domain
     sentences = Sentences(source)
 
-    model = FastText(size=200, window=3, min_count=100)
+    model = FastText(size=200, window=3, min_count=5)
     model.build_vocab(sentences)
     model.train(sentences, total_examples=model.corpus_count, epochs=model.iter)
     print("MODEL INFO : ",model)

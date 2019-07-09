@@ -35,7 +35,7 @@ print("finished reading ")
 brief_cleaning = (re.sub("[^A-Za-z']+", ' ', str(row)).lower() for row in lines)
 
 t = time()
-txt = [cleaning(doc) for doc in nlp.pipe(brief_cleaning, batch_size=5000, n_threads=-1)]
+txt = [doc for doc in nlp.pipe(brief_cleaning, batch_size=5000, n_threads=-1)]
 print('Time to clean up everything: {} mins'.format(round((time() - t) / 60, 2)))
 
 print (len(txt))

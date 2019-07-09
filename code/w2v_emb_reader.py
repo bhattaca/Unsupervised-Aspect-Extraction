@@ -6,6 +6,7 @@ import logging
 import gensim
 import numpy as np
 from sklearn.cluster import KMeans
+from fastText as fastText
 
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s %(levelname)s %(message)s')
@@ -21,7 +22,14 @@ class W2VEmbReader:
         emb_matrix = []
 
         # loading pretrained vectors
-        model = gensim.models.Word2Vec.load(emb_path)
+        #model = gensim.models.Word2Vec.load(emb_path)
+
+        #loading fasttext
+        print('\nLoading FT model')
+        model = lfastText.load_model('emb_path')
+        n_features = model.get_dimension()
+        print ( '\n model feature size: ', n_features)
+
         self.emb_dim = emb_dim
 
         for word in model.wv.vocab:

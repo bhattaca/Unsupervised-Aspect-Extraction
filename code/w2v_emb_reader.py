@@ -23,7 +23,7 @@ class W2VEmbReader:
 
         # loading pretrained vectors
         #model = gensim.models.Word2Vec.load(emb_path)
-        model = FastText.load_fasttext_format(emb_path)
+        model = FastText.load_facebook_model(emb_path)
 
         self.emb_dim = emb_dim
 

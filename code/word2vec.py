@@ -22,11 +22,11 @@ def main(domain):
 
     model = FT_gensim(size=200, window=3, min_count=100)  # instantiate
     # build the vocabulary
-    model.build_vocab(corpus_file=sentences)
+    model.build_vocab(corpus_file=source)
 
     # train the model
     model.train(
-        corpus_file=sentences, epochs=model.epochs,
+        corpus_file=source, epochs=model.epochs,
         total_examples=model.corpus_count, total_words=model.corpus_total_words
     )
 

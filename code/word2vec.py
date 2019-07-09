@@ -2,7 +2,7 @@
 #  -*- coding: utf-8  -*-
 
 import gensim
-from gensim.models.fasttext import FastText as FT_gensim
+from gensim.models import FastText
 import codecs
 
 
@@ -20,16 +20,9 @@ def main(domain):
     model_file = '/mnt/cephfs/hadoop-compute/phoenix/arindam/projectKraken/data/unsupervised_aspect_data/preprocessed_data/%s/w2v_embedding' % domain
     sentences = Sentences(source)
 
-    model = FT_gensim(size=200, window=3, min_count=100)  # instantiate
-    # build the vocabulary
-    model.build_vocab(corpus_file=source)
-
-    # train the model
-    model.train(
-        corpus_file=source, epochs=model.epochs,
-        total_examples=model.corpus_count, total_words=model.corpus_total_words
-    )
-
+    model = FastText(min_count=1)
+    model.build_vocab(sentences)
+    model.train(sentences, total_examples=model.corpus_count, epochs=model.iter)
     print(model)
     #model = gensim.models.Word2Vec(sentences, size=200, window=5, min_count=10, workers=4, sg=1, iter=5)
     model.save(model_file)

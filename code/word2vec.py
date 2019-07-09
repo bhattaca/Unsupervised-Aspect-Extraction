@@ -21,10 +21,18 @@ def main(domain):
     sentences = Sentences(source)
 
     model = FT_gensim(size=200, window=3, min_count=100)  # instantiate
-    model.build_vocab(sentences=sentences)
-    model.train(sentences=sentences, total_examples=len(sentences), epochs=10)  # train
+    # build the vocabulary
+    model.build_vocab(corpus_file=sentences)
+
+    # train the model
+    model.train(
+        corpus_file=sentences, epochs=model.epochs,
+        total_examples=model.corpus_count, total_words=model.corpus_total_words
+    )
+
+    print(model)
     #model = gensim.models.Word2Vec(sentences, size=200, window=5, min_count=10, workers=4, sg=1, iter=5)
-    #model.save(model_file)
+    model.save(model_file)
 
 
 if __name__ == "__main__":

@@ -18,7 +18,7 @@ class Sentences(object):
 def main(domain):
     source = '/mnt/cephfs/hadoop-compute/phoenix/arindam/projectKraken/data/unsupervised_aspect_data/preprocessed_data/%s/train.txt' % domain
     ## using the original text as source
-    source = "/mnt/cephfs/hadoop-compute/phoenix/arindam/projectKraken/data/unsupervised_aspect_data/datasets/eaters/train.txt" % domain
+    source = '/mnt/cephfs/hadoop-compute/phoenix/arindam/projectKraken/data/unsupervised_aspect_data/datasets/%s/train.txt" % domain
     model_file = '/mnt/cephfs/hadoop-compute/phoenix/arindam/projectKraken/data/unsupervised_aspect_data/preprocessed_data/%s/w2v_embedding.bin' % domain
     sentences = Sentences(source)
 

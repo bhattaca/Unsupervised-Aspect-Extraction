@@ -35,8 +35,8 @@ def cleaning(doc):
     # Word2Vec uses context words to learn the vector representation of a target word,
     # if a sentence is only one or two words long,
     # the benefit for the training is very small
-    if len(txt) > 2:
-        return ' '.join(txt)
+    #if len(txt) > 2:
+    return ' '.join(txt)
 
 
 lines = (line.rstrip('\n') for line in open(args.input_dir_path, encoding="utf-8"))
@@ -49,8 +49,6 @@ t = time()
 #txt = [cleaning(doc) for doc in nlp.pipe(brief_cleaning, batch_size=5000, n_threads=-1)]
 txt = [cleaning(doc) for doc in nlp.pipe(brief_cleaning, batch_size=5000, n_threads=4)]
 
-
-txt = [line for line in lines if txt.strip()]
 
 
 print('Time to clean up everything: {} mins'.format(round((time() - t) / 60, 2)))

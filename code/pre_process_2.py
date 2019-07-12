@@ -47,6 +47,11 @@ brief_cleaning = (re.sub("[^A-Za-z']+", ' ', str(row)).lower() for row in lines)
 
 t = time()
 txt = [cleaning(doc) for doc in nlp.pipe(brief_cleaning, batch_size=5000, n_threads=-1)]
+
+lines = txt.split('\n')
+txt = [line + "\n" for line in lines if line.strip()]
+
+
 print('Time to clean up everything: {} mins'.format(round((time() - t) / 60, 2)))
 
 print (len(txt))

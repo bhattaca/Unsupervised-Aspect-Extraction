@@ -24,7 +24,8 @@ class W2VEmbReader:
         # loading pretrained vectors
         #model = gensim.models.Word2Vec.load(emb_path)
         model = FastText.load(emb_path)
-
+        print("DEBUG")
+        print (model.wv.most_similar("cancel"))
         self.emb_dim = emb_dim
 
         for word in model.wv.vocab:

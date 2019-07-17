@@ -94,7 +94,7 @@ def read_dataset(domain, phase, vocab, maxlen):
         if maxlen_x < len(indices):
             maxlen_x = len(indices)
 
-    print('   <num> hit rate: %.2f%%, <unk> hit rate: %.2f%%' % (100 * num_hit / total, 100 * unk_hit / total))
+    print(' ***INFO***  <num> hit rate: %.2f%%, <unk> hit rate: %.2f%%' % (100 * num_hit / total, 100 * unk_hit / total))
     return data_x, maxlen_x
 
 
@@ -106,6 +106,7 @@ def get_data(domain, vocab_size=0, maxlen=0):
     print('  train set')
     train_x, train_maxlen = read_dataset(domain, 'train', vocab, maxlen)
     print('  Not reading test set')
+    max_len = train_maxlen # for now  i am not reading the test,
     return vocab, train_x, train_x, train_maxlen
     #test_x, test_maxlen = read_dataset(domain, 'test', vocab, maxlen)
     #maxlen = max(train_maxlen, test_maxlen)

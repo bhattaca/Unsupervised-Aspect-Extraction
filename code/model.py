@@ -36,7 +36,7 @@ def create_model(args, maxlen, vocab):
     # activity_regularizer=None, embeddings_constraint=None, mask_zero=False, input_length=None)
     word_emb = Embedding(vocab_size, args.emb_dim, mask_zero=True, name='word_emb')
     print ("INFO vocab_size: ", vocab_size)
-    print("INFO maxlen: ", maxlen)
+    print( "INFO maxlen: ", maxlen)
     print ("INFO args.emb_dim: ", args.emb_dim)
 
     # Compute sentence representation
